@@ -74,11 +74,14 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
 
           {/* Logo Fallback (SVG Icon for reliable loading) */}
           <div className="w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl relative z-10 overflow-hidden border-4 border-white/10">
-            <svg viewBox="0 0 100 100" className="w-20 h-20 text-primary">
-              <path fill="currentColor" d="M50 15L20 30L50 45L80 30L50 15Z" />
-              <path fill="currentColor" d="M20 40V70L50 85V55L20 40Z" opacity="0.8" />
-              <path fill="currentColor" d="M80 40V70L50 85V55L80 40Z" opacity="0.6" />
-              <circle cx="50" cy="50" r="10" fill="#facc15" />
+            <svg viewBox="0 0 100 100" className="w-20 h-20">
+              <path d="M20 40 Q50 30 80 40" fill="none" stroke="var(--primary)" stroke-width="4" stroke-linecap="round"></path>
+              <rect x="47" y="25" width="6" height="50" rx="3" fill="var(--warning)"></rect>
+              <circle cx="50" cy="25" r="5" fill="var(--warning)"></circle>
+              <path d="M20 40 L15 60 Q20 65 25 60 Z" fill="var(--accent)"></path>
+              <path d="M80 40 L75 60 Q80 65 85 60 Z" fill="var(--accent)"></path>
+              <circle cx="85" cy="20" r="10" fill="var(--warning)" stroke="white" stroke-width="2"></circle>
+              <text x="85" y="23" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--warning-foreground)">SN</text>
             </svg>
           </div>
         </motion.div>
