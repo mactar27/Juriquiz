@@ -1,0 +1,111 @@
+Introduction générale au droit
+Le cours a pour objet l'initiation au droit. Il s’agit en effet de mettre en relief les éléments qui permettent de savoir ce qu’est le droit. Le terme de "droit" est un concept qui peut revêtir plusieurs sens mais en ce qui nous concerne, cela ne peut signifier que deux réalités. C'est soit le droit objectif, soit le droit subjectif.
+Le droit objectif peut être défini comme l'ensemble des règles de droit applicables dans une société déterminée. C'est le droit qui est donc envisagé du côté de l'objet sur lequel il porte.
+
+Les droits subjectifs sont les prérogatives qu'on reconnaît aux individus, que l'on appelle sujets de droit, vis-à-vis d'autres individus ou vis-à-vis d'une chose.
+Ce sont ces deux aspects du droit qui vont faire l'objet de notre cours. Ils sont complémentaires mais on va devoir les séparer par souci didactique. Sous réserve de cette précision, l'étude de l'introduction générale au droit va être déclinée en deux temps qui correspondent successivement au droit objectif et aux droits subjectifs.
+
+[LE DROIT OBJECTIF]
+L'étude du droit objectif doit être envisagée en plusieurs rubriques : il y a d'abord la connaissance du droit, il y a ensuite la compréhension du droit, il y a par ailleurs la création du droit, et il y a enfin l'application du droit.
+
+[TITRE I:] LA CONNAISSANCE DU DROIT
+Pour connaître le droit, il faut voir sa physionomie et c'est à partir de celle-ci qu'on pourra apprécier si le droit est une science.
+Étudier la physionomie du droit consiste à voir sous quelle figure le droit se présente. Il s'agit alors d'étudier les éléments constitutifs de la règle de droit avant de relever les caractères de la règle de droit.
+[SECTION I:] les éléments constitutifs de la règle de droit.
+Il s'agit ici d'identifier les critères qui permettent d'attester l'existence de la règle de droit.
+Généralement, il est convenu que la règle de droit est une règle de conduite qui émane d'une autorité étatique et qui est sanctionnée en cas de violation.
+
+Paragraphe I: c'est une règle de conduite.
+La règle de droit a pour finalité d'organiser les rapports dans la société, on dit de réguler les rapports sociaux.
+La règle de droit est un guide comportemental, c'est par le droit qu'on peut faire ou ne pas faire, c'est le droit qui autorise ou qui interdit. C'est donc un véhicule d'instruction comportementale. Tous les rapports sociaux devraient se faire selon les normes prévues par le droit. On peut donc convenir que le droit est une règle de conduite sociale.
+
+Paragraphe II: l'intervention d'une autorité étatique.
+Pour être perçue comme une règle de droit, la règle en question doit provenir d'une autorité étatique.
+Au Sénégal, c'est l'Assemblée nationale qui a la compétence de créer des règles de droit.
+
+Paragraphe III: la sanction de la violation de la règle.
+Toute règle de droit doit être assortie de sanctions pour assurer son effectivité. Il y a deux sanctions principales :
+- Sanction pénale : peine de prison, amendes pour les infractions.
+- Sanction civile : annulation d'un acte irrégulier (nullité).
+
+[SECTION II]: les caractères de la règle de droit.
+La règle de droit est revêtue de trois caractères :
+1. Générale, impersonnelle et abstraite : elle ne vise personne de façon désignée tout en visant tout le monde.
+2. Obligatoire : elle s'applique "Erga omnes". On distingue :
+   - Règles impératives : on ne peut y déroger (ex: nom du père).
+   - Règles supplétives : on peut les écarter par une volonté contraire (ex: paiement de dette).
+3. Coercitive : on peut utiliser la force publique (forces de défense et tribunaux) pour la faire respecter.
+
+Comparaison avec d'autres règles :
+- Règle religieuse : sanction devant Dieu.
+- Règle morale : sanction interne (conscience).
+Le droit s'approprie parfois des concepts moraux (bonnes mœurs, bonne foi, équité).
+
+[TITRE II:] LA COMPRÉHENSION DU DROIT
+Le droit est une science sociale qui repose sur des méthodes et des sciences auxiliaires.
+
+Paragraphe I: les méthodes du droit
+1. Syllogisme juridique : Majeure (la règle), Mineure (le fait), Conclusion.
+2. Présomption : Conséquence tirée d'un fait connu pour un fait inconnu.
+   - Présomption irréfragable : indiscutable.
+   - Présomption mixte : contestable dans certains cas.
+   - Présomption simple : peut être contestée.
+3. Interprétation : à contrario ou à fortiori.
+
+Paragraphe II: les sciences auxiliaires du droit
+L'histoire du droit, le droit comparé, la sociologie et l'anthropologie juridique.
+
+[CRÉATION DU DROIT - SOURCES]
+Plusieurs catégories de lois :
+- Loi constitutionnelle : supérieure à toutes.
+- Loi référendaire : adoptée par référendum.
+- Loi organique : précise la Constitution (supra-légale mais infra-constitutionnelle).
+- Loi ordinaire : majorité simple.
+
+Processus législatif :
+- Projet de loi (exécutif) vs Proposition de loi (députés).
+- Adoption par l'Assemblée nationale uniquement.
+- Domaines réservés : libertés, droits fondamentaux, travail, etc. Tout le reste est du domaine du Règlement (exécutif).
+
+[LE RÈGLEMENT]
+Actes de l'exécutif : Décret (Président/Premier Ministre), Arrêté (Ministres), Circulaire (explication).
+- Règlement autonome : domaines non réservés à la loi.
+- Règlement d'exécution/application : précise la loi.
+
+[SOURCES INDIRECTES]
+1. Jurisprudence : ensemble des décisions des tribunaux. Interdiction des arrêts de règlement. Rôle d'interprétation.
+2. Coutume : pratique répétée et tenue pour obligatoire (opinio juris). Au Sénégal, surtout en droit de la famille et successions musulmanes.
+3. Doctrine : opinions des spécialistes (professeurs, magistrats, avocats). Influence le législateur et le juge.
+
+[APPLICATION DU DROIT]
+Territorialité : la loi sénégalaise s'applique sur tout le territoire, à tous (Sénégalais et étrangers).
+Exceptions : Droit international privé (statut personnel des étrangers, contrats internationaux).
+
+Application dans le temps :
+- Entrée en vigueur par promulgation (décret) et publication au Journal Officiel.
+- Nul n'est censé ignorer la loi.
+- Abrogation : expresse ou tacite.
+- Désuétude : la loi n'est plus appliquée sans être abrogée.
+- Principe de non-rétroactivité : la loi nouvelle ne s'applique pas au passé, sauf loi pénale plus douce ou loi interprétative.
+
+---
+LOI CONSTITUTIONNELLE N° 2016-10 DU 05 AVRIL 2016
+Cette loi porte révision de la Constitution du Sénégal pour moderniser le régime et renforcer la démocratie.
+
+Innovations majeures :
+1. Modernisation du rôle des partis politiques.
+2. Participation des candidats indépendants à toutes les élections.
+3. Création du Haut Conseil des Collectivités territoriales (HCCT).
+4. Reconnaissance de nouveaux droits : environnement sain, ressources naturelles, patrimoine foncier.
+5. Restauration du QUINQUENNAT (5 ans) pour le mandat présidentiel.
+6. Renforcement des droits de l'opposition et de son Chef.
+7. Représentation des Sénégalais de l'extérieur par des députés dédiés.
+8. Élargissement des pouvoirs de l'Assemblée nationale (évaluation des politiques publiques).
+9. Augmentation du nombre de membres du Conseil constitutionnel de 5 à 7.
+10. Intangibilité de la forme républicaine, du mode d'élection, et de la limitation à deux mandats consécutifs.
+
+Articles clés :
+- Article 27 : Le mandat est de 5 ans. Nul ne peut exercer plus de deux mandats consécutifs.
+- Article 25-1 : Les ressources naturelles appartiennent au peuple.
+- Article 89 : Le Conseil constitutionnel comprend 7 membres nommés par le Président (dont 2 proposés par le Président de l'Assemblée).
+- Article 92 : Le Conseil constitutionnel connaît de la constitutionnalité des lois et des conflits de compétence.
