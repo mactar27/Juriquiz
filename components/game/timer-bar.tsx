@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 
 interface TimerBarProps {
@@ -14,29 +14,41 @@ interface TimerBarProps {
 export function TimerBar({ duration, isActive, isPaused = false, onTimeUp, onTick }: TimerBarProps) {
   const [timeRemaining, setTimeRemaining] = useState(duration)
   const progress = (timeRemaining / duration) * 100
+  const onTimeUpRef = useRef(onTimeUp)
+  const onTickRef = useRef(onTick)
 
+  // Update refs to avoid dependency issues in useEffect
+  useEffect(() => {
+    onTimeUpRef.current = onTimeUp
+    onTickRef.current = onTick
+  }, [onTimeUp, onTick])
+
+  // Reset timer when duration or isActive changes
   useEffect(() => {
     setTimeRemaining(duration)
   }, [duration, isActive])
 
+  // The timer logic
   useEffect(() => {
     if (!isActive || isPaused) return
 
     const interval = setInterval(() => {
       setTimeRemaining((prev) => {
-        const newTime = prev - 0.1
-        if (newTime <= 0) {
-          clearInterval(interval)
-          onTimeUp()
-          return 0
-        }
-        onTick?.(newTime)
-        return newTime
+        const next = Math.max(0, prev - 0.1)
+        if (onTickRef.current) onTickRef.current(next)
+        return next
       })
     }, 100)
 
     return () => clearInterval(interval)
-  }, [isActive, isPaused, onTimeUp, onTick])
+  }, [isActive, isPaused])
+
+  // Handle time up in a separate effect to avoid "update during render" warning
+  useEffect(() => {
+    if (isActive && timeRemaining <= 0) {
+      onTimeUpRef.current()
+    }
+  }, [isActive, timeRemaining])
 
   // Color based on time remaining
   const getColor = () => {
