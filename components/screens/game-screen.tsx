@@ -149,7 +149,8 @@ export function GameScreen() {
               <Dice3D 
                 isRolling={isRolling} 
                 onRollComplete={handleDiceComplete} 
-                playerNames={players.map(p => p.name)} 
+                playerNames={players.map(p => p.name)}
+                targetFace={((currentPlayerIndex + 1) % players.length) + 1}
               />
               
               <div className="w-full max-w-sm">

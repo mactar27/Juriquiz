@@ -81,14 +81,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   rollDice: async () => {
     return new Promise((resolve) => {
+      // In this mode, the next player is always sequential
+      const { players, currentPlayerIndex, questions, usedQuestionIds } = get()
+      const nextPlayerIndex = (currentPlayerIndex + 1) % players.length
+      
       // Simulate dice rolling animation time
       setTimeout(() => {
-        const face = Math.floor(Math.random() * 6) + 1
-        const result = DICE_FACES[face]
-        
-        // NEW LOGIC: The dice selects the player
-        const { players, questions, usedQuestionIds } = get()
-        const selectedPlayerIndex = (face - 1) % players.length
+        // The face result must match the next player index for the dice to land on their name
+        // face 1 = index 0, face 2 = index 1, etc.
+        const targetFace = (nextPlayerIndex % 6) + 1
+        const result = DICE_FACES[targetFace]
         
         // Get a question matching the result difficulty
         const question = getRandomQuestion(
@@ -99,7 +101,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         )
         
         set({ 
-          currentPlayerIndex: selectedPlayerIndex,
+          currentPlayerIndex: nextPlayerIndex, // Now the turn passes sequentially
           diceResult: result,
           currentQuestion: question,
           usedQuestionIds: question 
@@ -109,7 +111,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         })
         
         resolve(result)
-      }, 2000) // 2 seconds for dice animation
+      }, 2000)
     })
   },
 
@@ -149,13 +151,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
   nextTurn: () => {
     const { players, currentPlayerIndex, roundNumber, totalRounds } = get()
     
-    // In this mode, the round increments when everyone has played roughly, 
-    // or we just count total turns. Let's count turns.
-    const isNewRound = (get().usedQuestionIds.length % players.length) === 0
+    // Round increments when we get back to the first player
+    const isNewRound = currentPlayerIndex === players.length - 1
     const newRoundNumber = isNewRound ? roundNumber + 1 : roundNumber
     
     // Check if game is finished
-    if (newRoundNumber > totalRounds) {
+    if (newRoundNumber > totalRounds && isNewRound) {
       set({ gamePhase: 'finished' })
       return
     }
@@ -165,7 +166,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentQuestion: null,
       diceResult: null,
       lastAnswerCorrect: null,
-      gamePhase: 'rolling', // Go directly to rolling so the next player can be chosen
+      gamePhase: 'rolling',
     })
   },
 

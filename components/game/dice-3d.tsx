@@ -11,12 +11,13 @@ interface DiceProps {
   isRolling: boolean
   onRollComplete: (result: DiceResult) => void
   playerNames?: string[]
+  targetFace?: number
 }
 
 // Face labels for the dice
 const FACE_LABELS = ['1', '2', '3', '4', '5', '6']
 
-function Dice({ isRolling, onRollComplete, playerNames = [] }: DiceProps) {
+function Dice({ isRolling, onRollComplete, playerNames = [], targetFace }: DiceProps) {
   const rigidBodyRef = useRef<RapierRigidBody>(null)
   const [hasLanded, setHasLanded] = useState(false)
   const [showSparkles, setShowSparkles] = useState(false)
@@ -83,7 +84,21 @@ function Dice({ isRolling, onRollComplete, playerNames = [] }: DiceProps) {
         setHasLanded(true)
         setShowSparkles(true)
         
-        const face = determineFaceUp(rigidBodyRef.current)
+        // Force the target face if provided to ensure sequential order
+        if (targetFace !== undefined) {
+          const targetQuat = new THREE.Quaternion()
+          // Face mapping: 1:Up, 2:Front-ish, etc. (based on labels)
+          if (targetFace === 1) targetQuat.setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0))
+          else if (targetFace === 2) targetQuat.setFromEuler(new THREE.Euler(0, -Math.PI / 2, 0))
+          else if (targetFace === 3) targetQuat.setFromEuler(new THREE.Euler(0, Math.PI / 2, 0))
+          else if (targetFace === 4) targetQuat.setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0))
+          else if (targetFace === 5) targetQuat.setFromEuler(new THREE.Euler(0, 0, 0))
+          else if (targetFace === 6) targetQuat.setFromEuler(new THREE.Euler(0, Math.PI, 0))
+          
+          rigidBodyRef.current.setRotation(targetQuat, true)
+        }
+
+        const face = targetFace || determineFaceUp(rigidBodyRef.current)
         const result = DICE_FACES[face]
         
         setTimeout(() => {
@@ -129,19 +144,29 @@ function Dice({ isRolling, onRollComplete, playerNames = [] }: DiceProps) {
             ? playerNames[face % playerNames.length] 
             : null
           
+          // Dynamic font size based on name length
+          const getFontSize = (name: string) => {
+            if (name.length > 12) return 0.22
+            if (name.length > 8) return 0.28
+            if (name.length > 5) return 0.35
+            return 0.45
+          }
+          
           return (
             <Text
               key={face}
               position={pos as [number, number, number]}
               rotation={rot as [number, number, number]}
-              fontSize={playerName ? (playerName.length > 6 ? 0.35 : 0.45) : 0.6}
+              fontSize={playerName ? getFontSize(playerName) : 0.6}
               color="white"
               anchorX="center"
               anchorY="middle"
               outlineWidth={0.06}
               outlineColor="#c4a706" // Gold outline
-              maxWidth={1.2}
+              maxWidth={1.1} // Slightly narrower to avoid edges
               textAlign="center"
+              overflowWrap="break-word"
+              lineHeight={1}
             >
               {playerName ? playerName.toUpperCase() : '?'}
             </Text>
@@ -256,9 +281,10 @@ interface Dice3DProps {
   isRolling: boolean
   onRollComplete: (result: DiceResult) => void
   playerNames?: string[]
+  targetFace?: number
 }
 
-export function Dice3D({ isRolling, onRollComplete, playerNames = [] }: Dice3DProps) {
+export function Dice3D({ isRolling, onRollComplete, playerNames = [], targetFace }: Dice3DProps) {
   return (
     <div className="w-full aspect-square max-w-md mx-auto rounded-[3rem] overflow-hidden bg-gradient-to-b from-indigo-950/20 to-purple-900/20 border-4 border-white/10 shadow-inner relative">
       <Canvas
@@ -281,6 +307,7 @@ export function Dice3D({ isRolling, onRollComplete, playerNames = [] }: Dice3DPr
             isRolling={isRolling} 
             onRollComplete={onRollComplete} 
             playerNames={playerNames}
+            targetFace={targetFace}
           />
           <Ground />
           <Walls />
