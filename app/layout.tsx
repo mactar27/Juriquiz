@@ -17,8 +17,8 @@ export const metadata: Metadata = {
     title: 'JuriQuiz',
   },
   icons: {
-    icon: '/icon-512x512.png',
-    apple: '/icon-512x512.png',
+    icon: '/icon.svg',
+    apple: '/icon.svg',
   },
 }
 
