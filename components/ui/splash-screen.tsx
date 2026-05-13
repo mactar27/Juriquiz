@@ -32,15 +32,15 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0f172a] text-white"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white text-primary"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8, ease: 'easeInOut' }}
     >
       {/* Background Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/20 blur-[120px] rounded-full" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/5 blur-[120px] rounded-full" />
       </div>
 
       <div className="relative flex flex-col items-center">
@@ -62,18 +62,18 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
         >
           {/* Outer Ring Animation */}
           <motion.div
-            className="absolute -inset-8 border-2 border-primary/30 rounded-full"
+            className="absolute -inset-8 border-2 border-primary/10 rounded-full"
             animate={{ rotate: 360, scale: [1, 1.1, 1] }}
             transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
           />
           <motion.div
-            className="absolute -inset-4 border-2 border-accent/20 rounded-full"
+            className="absolute -inset-4 border-2 border-accent/10 rounded-full"
             animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
             transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
           />
 
-          {/* Logo Fallback (SVG Icon for reliable loading) */}
-          <div className="w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl relative z-10 overflow-hidden border-4 border-white/10">
+          {/* Logo Container */}
+          <div className="w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-sticker relative z-10 overflow-hidden border-4 border-primary/5">
             <svg viewBox="0 0 100 100" className="w-20 h-20">
               <path d="M20 40 Q50 30 80 40" fill="none" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round"></path>
               <rect x="47" y="25" width="6" height="50" rx="3" fill="var(--warning)"></rect>
@@ -91,7 +91,7 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-4xl font-black tracking-tighter mb-2 bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent"
+          className="text-4xl font-black tracking-tighter mb-2 text-primary"
         >
           JURIQUIZ
         </motion.h1>
@@ -100,13 +100,13 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="text-primary/60 font-black uppercase tracking-[0.4em] text-[10px] mb-8"
+          className="text-primary/40 font-black uppercase tracking-[0.4em] text-[10px] mb-8"
         >
           L'EXCELLENCE JURIDIQUE
         </motion.p>
 
         {/* Loading Indicator */}
-        <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden mb-4">
+        <div className="w-48 h-1 bg-primary/10 rounded-full overflow-hidden mb-4">
           <motion.div
             className="h-full bg-primary"
             initial={{ width: 0 }}
@@ -119,7 +119,7 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
           key={loadingText}
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-white/40 text-xs font-medium"
+          className="text-primary/30 text-xs font-bold"
         >
           {loadingText}
         </motion.p>
@@ -132,8 +132,8 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
       >
-        <span className="text-[10px] font-black uppercase tracking-widest text-white/20">Powered by</span>
-        <span className="text-sm font-black tracking-tight text-white/40">Wockytech</span>
+        <span className="text-[10px] font-black uppercase tracking-widest text-primary/20">Powered by</span>
+        <span className="text-sm font-black tracking-tight text-primary/40">Wockytech</span>
       </motion.div>
     </motion.div>
   )
