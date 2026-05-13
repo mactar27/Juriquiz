@@ -72,13 +72,13 @@ export function HomeScreen({ onImportClick, onSettingsClick }: HomeScreenProps) 
           {/* High-quality SVG Logo Fallback - Matches the provided theme */}
           <div className="relative w-full h-full flex items-center justify-center">
             <svg viewBox="0 0 100 100" className="w-32 h-32 drop-shadow-md">
-              <path d="M20 40 Q50 30 80 40" fill="none" stroke="var(--primary)" stroke-width="4" stroke-linecap="round"></path>
+              <path d="M20 40 Q50 30 80 40" fill="none" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round"></path>
               <rect x="47" y="25" width="6" height="50" rx="3" fill="var(--warning)"></rect>
               <circle cx="50" cy="25" r="5" fill="var(--warning)"></circle>
               <path d="M20 40 L15 60 Q20 65 25 60 Z" fill="var(--accent)"></path>
               <path d="M80 40 L75 60 Q80 65 85 60 Z" fill="var(--accent)"></path>
-              <circle cx="85" cy="20" r="10" fill="var(--warning)" stroke="white" stroke-width="2"></circle>
-              <text x="85" y="23" text-anchor="middle" font-size="8" font-weight="bold" fill="var(--warning-foreground)">SN</text>
+              <circle cx="85" cy="20" r="10" fill="var(--warning)" stroke="white" strokeWidth="2"></circle>
+              <text x="85" y="23" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--warning-foreground)">SN</text>
             </svg>
           </div>
         </motion.div>
