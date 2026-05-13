@@ -125,7 +125,7 @@ export function FeedbackOverlay({
                 <Scale className="w-12 h-12" />
               </div>
               <p className="text-xs font-black text-primary/40 uppercase tracking-widest mb-2 flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                 Le saviez-vous ?
               </p>
               <p className="text-sm text-foreground leading-relaxed font-medium">
