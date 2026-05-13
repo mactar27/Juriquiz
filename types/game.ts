@@ -1,5 +1,5 @@
-export type Difficulty = 'easy' | 'medium' | 'hard'
-export type QuestionType = 'qcm' | 'truefalse' | 'rapid'
+export type Difficulty = 'facile' | 'moyen' | 'difficile'
+export type QuestionType = 'qcm' | 'vrai-faux' | 'rapide'
 
 export interface Player {
   id: string
@@ -13,13 +13,13 @@ export interface Player {
 
 export interface Question {
   id: string
-  text: string
+  label: string
   options: string[]
   correctIndex: number
   difficulty: Difficulty
   type: QuestionType
-  category: string
-  explanation?: string
+  category: 'constitution' | 'ohada' | 'biens' | 'introduction' | 'jurisprudence' | 'patrimoine'
+  explanation: string
 }
 
 export interface DiceResult {
@@ -62,12 +62,12 @@ export const AVATARS = [
 
 // Dice face mapping
 export const DICE_FACES: Record<number, DiceResult> = {
-  1: { face: 1, difficulty: 'easy', type: 'qcm', bonusMultiplier: 1, timeLimit: 15 },
-  2: { face: 2, difficulty: 'medium', type: 'qcm', bonusMultiplier: 1, timeLimit: 15 },
-  3: { face: 3, difficulty: 'hard', type: 'qcm', bonusMultiplier: 1, timeLimit: 15 },
-  4: { face: 4, difficulty: 'medium', type: 'truefalse', bonusMultiplier: 1, timeLimit: 15 },
-  5: { face: 5, difficulty: 'medium', type: 'rapid', bonusMultiplier: 1, timeLimit: 8 },
-  6: { face: 6, difficulty: 'hard', type: 'qcm', bonusMultiplier: 2, timeLimit: 15 },
+  1: { face: 1, difficulty: 'facile', type: 'qcm', bonusMultiplier: 1, timeLimit: 15 },
+  2: { face: 2, difficulty: 'moyen', type: 'qcm', bonusMultiplier: 1, timeLimit: 15 },
+  3: { face: 3, difficulty: 'difficile', type: 'qcm', bonusMultiplier: 1, timeLimit: 15 },
+  4: { face: 4, difficulty: 'moyen', type: 'vrai-faux', bonusMultiplier: 1, timeLimit: 15 },
+  5: { face: 5, difficulty: 'moyen', type: 'rapide', bonusMultiplier: 1, timeLimit: 8 },
+  6: { face: 6, difficulty: 'difficile', type: 'qcm', bonusMultiplier: 2, timeLimit: 15 },
 }
 
 // Player titles based on score

@@ -11,6 +11,7 @@ interface FeedbackOverlayProps {
   points: number
   streak: number
   explanation?: string
+  correctAnswer?: string
   onComplete: () => void
 }
 
@@ -19,6 +20,7 @@ export function FeedbackOverlay({
   points,
   streak,
   explanation,
+  correctAnswer,
   onComplete,
 }: FeedbackOverlayProps) {
   useEffect(() => {
@@ -28,7 +30,7 @@ export function FeedbackOverlay({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#d4af37', '#22c55e', '#f5f5f0'],
+        colors: ['#00853f', '#fdef42', '#e31b23'], // Vert, Jaune, Rouge (Sénégal)
       })
     }
   }, [correct, streak])
@@ -114,7 +116,7 @@ export function FeedbackOverlay({
             <div className="p-4 rounded-2xl bg-success/10 border-2 border-success/20">
               <p className="text-xs font-black text-success uppercase tracking-widest mb-1">La bonne réponse était :</p>
               <p className="text-lg font-bold text-foreground italic">
-                {explanation?.split('|')[0] || "Voir ci-dessous"}
+                {correctAnswer || "Non disponible"}
               </p>
             </div>
           )}

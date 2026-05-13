@@ -2,16 +2,16 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Play, Upload, History, Settings, Scale } from 'lucide-react'
+import { Play, History, Settings, Scale } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useGameStore } from '@/lib/game-store'
 
 interface HomeScreenProps {
-  onImportClick: () => void
   onSettingsClick: () => void
+  onStatsClick: () => void
 }
 
-export function HomeScreen({ onImportClick, onSettingsClick }: HomeScreenProps) {
+export function HomeScreen({ onSettingsClick, onStatsClick }: HomeScreenProps) {
   const { soundEnabled, setGamePhase } = useGameStore()
   const [logoError, setLogoError] = useState(false)
 
@@ -23,15 +23,9 @@ export function HomeScreen({ onImportClick, onSettingsClick }: HomeScreenProps) 
       primary: true,
     },
     {
-      icon: Upload,
-      label: 'Nouveau Quiz IA',
-      onClick: onImportClick,
-      primary: false,
-    },
-    {
       icon: History,
       label: 'Statistiques',
-      onClick: () => {},
+      onClick: onStatsClick,
       primary: false,
     },
     {

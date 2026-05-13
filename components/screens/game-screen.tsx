@@ -3,9 +3,10 @@
 import { useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
-import { Dices, ArrowRight, Pause, RotateCcw, Home, Menu } from 'lucide-react'
+import { Shuffle, ArrowRight, Pause, RotateCcw, Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useGameStore } from '@/lib/game-store'
+import { useAudio } from '@/lib/use-audio'
 import { TimerBar } from '@/components/game/timer-bar'
 import { QuestionCard } from '@/components/game/question-card'
 import { AnswerOptions } from '@/components/game/answer-options'
@@ -21,8 +22,11 @@ const Dice3D = dynamic(
 
 function DicePlaceholder() {
   return (
-    <div className="w-full aspect-square max-w-md mx-auto rounded-2xl bg-card/50 flex items-center justify-center">
-      <Dices className="w-16 h-16 text-muted-foreground animate-pulse" />
+    <div className="w-full aspect-square max-w-md mx-auto rounded-[3rem] bg-indigo-950/20 flex items-center justify-center">
+      <div className="text-white opacity-50 flex flex-col items-center gap-4">
+        <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+        <p className="font-bold">Chargement du moteur 3D...</p>
+      </div>
     </div>
   )
 }
@@ -43,7 +47,10 @@ export function GameScreen() {
     setGamePhase,
   } = useGameStore()
 
+  const { playSound } = useAudio()
+
   const [isRolling, setIsRolling] = useState(false)
+  const [nextResult, setNextResult] = useState<DiceResult | null>(null)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [showFeedback, setShowFeedback] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
@@ -52,33 +59,43 @@ export function GameScreen() {
   const currentPlayer = players[currentPlayerIndex]
 
   const handleRollDice = useCallback(async () => {
+    const result = await rollDice()
+    setNextResult(result)
     setIsRolling(true)
-    await rollDice()
-    setIsRolling(false)
+    playSound('spin')
     setSelectedAnswer(null)
-  }, [rollDice])
+  }, [rollDice, playSound])
+
+  const { completeRoll } = useGameStore()
 
   const handleDiceComplete = useCallback((result: DiceResult) => {
+    setIsRolling(false)
+    setNextResult(null)
+    completeRoll(result)
     timeRemainingRef.current = result.timeLimit
-  }, [])
+  }, [completeRoll])
 
   const handleAnswer = useCallback(
     (index: number) => {
       if (selectedAnswer !== null || isPaused) return
       setSelectedAnswer(index)
+      
+      const isCorrect = index === currentQuestion?.correctIndex
+      playSound(isCorrect ? 'correct' : 'wrong')
+      
       answerQuestion(index, timeRemainingRef.current)
       setShowFeedback(true)
     },
-    [selectedAnswer, answerQuestion, isPaused]
+    [selectedAnswer, answerQuestion, isPaused, currentQuestion, playSound]
   )
 
   const handleTimeUp = useCallback(() => {
     if (selectedAnswer === null && !isPaused) {
-      // Time ran out, treat as wrong answer
+      playSound('wrong')
       answerQuestion(-1, 0)
       setShowFeedback(true)
     }
-  }, [selectedAnswer, answerQuestion, isPaused])
+  }, [selectedAnswer, answerQuestion, isPaused, playSound])
 
   const handleTimeTick = useCallback((remaining: number) => {
     timeRemainingRef.current = remaining
@@ -89,7 +106,6 @@ export function GameScreen() {
     nextTurn()
   }, [nextTurn])
 
-  // Calculate points for display
   const pointsEarned = lastAnswerCorrect
     ? calculateScore(
         true,
@@ -137,7 +153,6 @@ export function GameScreen() {
       {/* Main content area */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 gap-8">
         <AnimatePresence mode="wait">
-          {/* Rolling phase */}
           {gamePhase === 'rolling' && (
             <motion.div
               key="rolling"
@@ -150,7 +165,7 @@ export function GameScreen() {
                 isRolling={isRolling} 
                 onRollComplete={handleDiceComplete} 
                 playerNames={players.map(p => p.name)}
-                targetFace={((currentPlayerIndex + 1) % players.length) + 1}
+                targetFace={nextResult?.face || ((currentPlayerIndex + 1) % players.length) + 1}
               />
               
               <div className="w-full max-w-sm">
@@ -160,14 +175,13 @@ export function GameScreen() {
                   className="w-full h-20 text-2xl font-black gap-4 bg-primary text-white border-b-8 border-primary/40 hover:bg-primary/90 rounded-[2rem] shadow-sticker disabled:opacity-50 active:border-b-0 active:translate-y-1 transition-all"
                   size="lg"
                 >
-                  <Dices className="w-8 h-8" />
-                  {isRolling ? 'LANCEMENT...' : 'LANCER LE DÉ'}
+                  <Shuffle className="w-8 h-8" />
+                  {isRolling ? 'TIRAGE EN COURS...' : 'TIRER AU SORT'}
                 </Button>
               </div>
             </motion.div>
           )}
 
-          {/* Question phase */}
           {gamePhase === 'question' && currentQuestion && diceResult && (
             <motion.div
               key="question"
@@ -198,38 +212,10 @@ export function GameScreen() {
               />
             </motion.div>
           )}
-
-          {/* Turn transition */}
-          {gamePhase === 'turnTransition' && (
-            <motion.div
-              key="transition"
-              className="flex flex-col items-center gap-8"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-            >
-              <motion.div
-                className="w-32 h-32 rounded-[2.5rem] bg-white border-8 border-primary/20 flex items-center justify-center text-6xl shadow-sticker"
-                animate={{
-                  y: [0, -10, 0],
-                  scale: [1, 1.05, 1],
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                {players[(currentPlayerIndex + 1) % players.length]?.avatar}
-              </motion.div>
-              <div className="text-center space-y-2">
-                <p className="text-primary/60 text-xs font-black uppercase tracking-[0.3em]">C'est au tour de</p>
-                <p className="text-4xl font-black text-primary drop-shadow-sm">
-                  {players[(currentPlayerIndex + 1) % players.length]?.name}
-                </p>
-              </div>
-            </motion.div>
-          )}
         </AnimatePresence>
       </div>
 
-      {/* Scoreboard - Fixed at bottom */}
+      {/* Scoreboard */}
       <div className="p-6">
         <Scoreboard players={players} currentPlayerIndex={currentPlayerIndex} />
       </div>
@@ -242,6 +228,7 @@ export function GameScreen() {
             points={pointsEarned}
             streak={currentPlayer?.streak || 0}
             explanation={currentQuestion.explanation}
+            correctAnswer={currentQuestion.options[currentQuestion.correctIndex]}
             onComplete={handleFeedbackComplete}
           />
         )}

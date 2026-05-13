@@ -1,55 +1,52 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
-import { Trophy, RotateCcw, Home, Share2, Crown, Target, Flame } from 'lucide-react'
+import { Trophy, RotateCcw, Home, Share2, Crown, Target, Flame, Medal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useGameStore } from '@/lib/game-store'
 import { Player, getPlayerTitle } from '@/types/game'
 
+const SENEGAL_COLORS = ['#00853f', '#fdef42', '#e31b23'] // Vert, Jaune, Rouge
+
 export function ResultsScreen() {
-  const { players, resetGame, setGamePhase } = useGameStore()
-  const [showStats, setShowStats] = useState(false)
+  const { players, resetGame, rematch, setGamePhase } = useGameStore()
+  const [showDetails, setShowDetails] = useState(false)
 
   // Sort players by score
   const rankedPlayers = [...players].sort((a, b) => b.score - a.score)
   const winner = rankedPlayers[0]
 
   useEffect(() => {
-    // Fire confetti
-    const duration = 3000
-    const end = Date.now() + duration
+    // Fire Senegal-themed confetti
+    const duration = 5 * 1000
+    const animationEnd = Date.now() + duration
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 }
 
-    const frame = () => {
-      confetti({
-        particleCount: 3,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ['#3b82f6', '#6366f1', '#f5f5f5'],
-      })
-      confetti({
-        particleCount: 3,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ['#3b82f6', '#6366f1', '#f5f5f5'],
-      })
+    const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min
 
-      if (Date.now() < end) {
-        requestAnimationFrame(frame)
+    const interval: any = setInterval(function() {
+      const timeLeft = animationEnd - Date.now()
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval)
       }
-    }
-    frame()
 
-    // Show stats after podium animation
-    setTimeout(() => setShowStats(true), 2000)
+      const particleCount = 50 * (timeLeft / duration)
+      // since particles fall down, start a bit higher than random
+      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }, colors: SENEGAL_COLORS })
+      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }, colors: SENEGAL_COLORS })
+    }, 250)
+
+    // Show details after podium animation
+    setTimeout(() => setShowDetails(true), 2500)
+
+    return () => clearInterval(interval)
   }, [])
 
-  const handlePlayAgain = () => {
-    resetGame()
-    setGamePhase('setup')
+  const handleRematch = () => {
+    rematch()
   }
 
   const handleGoHome = () => {
@@ -58,271 +55,175 @@ export function ResultsScreen() {
   }
 
   const handleShare = () => {
-    const text = `JuriQuiz Senegal - Resultats\n\n${rankedPlayers
+    const text = `🏆 JuriQuiz Sénégal - Résultats\n\n${rankedPlayers
       .map((p, i) => `${i + 1}. ${p.name}: ${p.score} pts (${getPlayerTitle(p.score)})`)
-      .join('\n')}`
+      .join('\n')}\n\nApprends le droit en jouant ! 🇸🇳`
     navigator.clipboard.writeText(text)
+    alert('Résultats copiés !')
   }
 
   return (
-    <div className="min-h-screen flex flex-col p-6 relative overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
+    <div className="min-h-screen flex flex-col p-6 bg-[radial-gradient(circle_at_top,var(--secondary),var(--background))] relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 pointer-events-none opacity-20">
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-accent rounded-full blur-3xl" />
       </div>
 
       {/* Header */}
       <motion.div
-        className="text-center mb-8"
-        initial={{ opacity: 0, y: -20 }}
+        className="text-center mb-12 relative z-10"
+        initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
       >
-        <Trophy className="w-12 h-12 text-primary mx-auto mb-4" />
-        <h1 className="text-3xl font-bold gradient-text">Partie terminee!</h1>
+        <div className="inline-block p-4 bg-white rounded-[2rem] shadow-sticker mb-4 border-4 border-primary/10">
+          <Trophy className="w-12 h-12 text-warning" />
+        </div>
+        <h1 className="text-4xl font-black text-primary tracking-tight uppercase">Partie terminée !</h1>
+        <p className="text-sm font-bold text-primary/60 uppercase tracking-widest mt-2">Le verdict est tombé</p>
       </motion.div>
 
-      {/* Podium */}
-      <div className="flex-1 flex flex-col items-center justify-center">
-        {players.length >= 2 ? (
-          <div className="flex items-end justify-center gap-4 mb-8">
-            {/* Second place */}
-            {rankedPlayers[1] && (
-              <PodiumPlace
-                player={rankedPlayers[1]}
-                place={2}
-                height={120}
-                delay={0.4}
-              />
-            )}
+      {/* Podium Area */}
+      <div className="flex-1 flex flex-col items-center justify-center mb-8">
+        <div className="flex items-end justify-center gap-2 md:gap-6 w-full max-w-sm h-64">
+          {/* Second Place */}
+          {rankedPlayers[1] && (
+            <PodiumColumn player={rankedPlayers[1]} rank={2} height="50%" delay={0.4} />
+          )}
+          
+          {/* First Place */}
+          {winner && (
+            <PodiumColumn player={winner} rank={1} height="75%" delay={0.2} isWinner />
+          )}
 
-            {/* First place */}
-            <PodiumPlace
-              player={rankedPlayers[0]}
-              place={1}
-              height={160}
-              delay={0.2}
-            />
+          {/* Third Place */}
+          {rankedPlayers[2] && (
+            <PodiumColumn player={rankedPlayers[2]} rank={3} height="35%" delay={0.6} />
+          )}
+        </div>
+      </div>
 
-            {/* Third place */}
-            {rankedPlayers[2] && (
-              <PodiumPlace
-                player={rankedPlayers[2]}
-                place={3}
-                height={80}
-                delay={0.6}
-              />
-            )}
-          </div>
-        ) : (
-          // Single player result
+      {/* Ranking List */}
+      <AnimatePresence>
+        {showDetails && (
           <motion.div
-            className="text-center mb-8"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 200, delay: 0.3 }}
-          >
-            <div className="relative inline-block">
-              <motion.div
-                className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-6xl"
-                animate={{
-                  boxShadow: [
-                    '0 0 30px oklch(0.55 0.20 260 / 0.5)',
-                    '0 0 60px oklch(0.55 0.20 260 / 0.8)',
-                    '0 0 30px oklch(0.55 0.20 260 / 0.5)',
-                  ],
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                {winner.avatar}
-              </motion.div>
-              <motion.div
-                className="absolute -top-4 -right-4"
-                initial={{ scale: 0, rotate: -30 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ delay: 0.8, type: 'spring' }}
-              >
-                <Crown className="w-10 h-10 text-primary fill-primary" />
-              </motion.div>
-            </div>
-            <h2 className="text-2xl font-bold text-foreground mt-4">
-              {winner.name}
-            </h2>
-            <p className="text-4xl font-bold gradient-text mt-2">
-              {winner.score} points
-            </p>
-            <p className="text-muted-foreground mt-1">
-              {getPlayerTitle(winner.score)}
-            </p>
-          </motion.div>
-        )}
-
-        {/* Stats cards */}
-        {showStats && (
-          <motion.div
-            className="w-full max-w-md space-y-3"
+            className="w-full max-w-md mx-auto space-y-3 mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
+            <p className="text-[10px] font-black text-primary/40 uppercase tracking-[0.3em] text-center mb-2">Tableau des scores</p>
             {rankedPlayers.map((player, index) => (
-              <StatsCard key={player.id} player={player} rank={index + 1} />
+              <motion.div
+                key={player.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="flex items-center gap-4 p-4 rounded-3xl bg-white border-4 border-primary/5 shadow-sticker"
+              >
+                <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-xl shadow-inner">
+                  {player.avatar}
+                </div>
+                <div className="flex-1">
+                  <p className="font-black text-foreground">{player.name}</p>
+                  <p className="text-[10px] font-bold text-primary uppercase tracking-wider">{getPlayerTitle(player.score)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xl font-black text-primary">{player.score}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">pts</p>
+                </div>
+              </motion.div>
             ))}
           </motion.div>
         )}
-      </div>
+      </AnimatePresence>
 
-      {/* Actions */}
+      {/* Footer Actions */}
       <motion.div
-        className="space-y-3 mt-6"
-        initial={{ opacity: 0, y: 20 }}
+        className="mt-auto grid grid-cols-1 gap-4 relative z-10"
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5 }}
+        transition={{ delay: 1.2 }}
       >
-        <Button
-          onClick={handleShare}
-          variant="outline"
-          className="w-full h-12 gap-2"
-        >
-          <Share2 className="w-5 h-5" />
-          Partager les resultats
-        </Button>
-
-        <div className="flex gap-3">
+        <div className="grid grid-cols-2 gap-4">
           <Button
             onClick={handleGoHome}
-            variant="secondary"
-            className="flex-1 h-12 gap-2"
+            variant="ghost"
+            className="h-16 rounded-[1.5rem] font-black text-primary border-4 border-primary/10 bg-white shadow-sticker active:border-b-0 active:translate-y-1"
           >
-            <Home className="w-5 h-5" />
-            Accueil
+            <Home className="w-6 h-6 mr-2" />
+            ACCUEIL
           </Button>
           <Button
-            onClick={handlePlayAgain}
-            className="flex-1 h-12 gap-2 bg-gradient-to-r from-primary to-accent text-primary-foreground"
+            onClick={handleRematch}
+            className="h-16 rounded-[1.5rem] font-black bg-primary text-white border-b-8 border-primary/40 shadow-sticker active:border-b-0 active:translate-y-1"
           >
-            <RotateCcw className="w-5 h-5" />
-            Rejouer
+            <RotateCcw className="w-6 h-6 mr-2" />
+            REVANCHE
           </Button>
         </div>
+        <Button
+          onClick={handleShare}
+          variant="ghost"
+          className="h-14 rounded-2xl font-bold text-primary/60 border-2 border-dashed border-primary/20"
+        >
+          <Share2 className="w-5 h-5 mr-2" />
+          Partager le verdict
+        </Button>
       </motion.div>
     </div>
   )
 }
 
-interface PodiumPlaceProps {
-  player: Player
-  place: number
-  height: number
-  delay: number
-}
-
-function PodiumPlace({ player, place, height, delay }: PodiumPlaceProps) {
+function PodiumColumn({ player, rank, height, delay, isWinner = false }: { player: Player, rank: number, height: string, delay: number, isWinner?: boolean }) {
   const colors = {
-    1: 'from-primary to-accent',
-    2: 'from-gray-400 to-gray-500',
-    3: 'from-amber-700 to-amber-800',
+    1: 'bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-200',
+    2: 'bg-gradient-to-b from-slate-300 to-slate-400 border-slate-200',
+    3: 'bg-gradient-to-b from-orange-400 to-orange-500 border-orange-300',
   }
 
+  const medals = { 1: '🥇', 2: '🥈', 3: '🥉' }
+
   return (
     <motion.div
-      className="flex flex-col items-center"
-      initial={{ opacity: 0, y: 50 }}
+      className="flex flex-col items-center flex-1 h-full"
+      initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, type: 'spring', stiffness: 100 }}
+      transition={{ delay, duration: 0.8, type: 'spring' }}
     >
-      {/* Avatar */}
-      <motion.div
-        className={`
-          w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-2
-          ${place === 1 ? 'ring-4 ring-primary' : 'ring-2 ring-border'}
-          bg-card
-        `}
-        animate={place === 1 ? {
-          boxShadow: [
-            '0 0 20px oklch(0.55 0.20 260 / 0.4)',
-            '0 0 40px oklch(0.55 0.20 260 / 0.7)',
-            '0 0 20px oklch(0.55 0.20 260 / 0.4)',
-          ],
-        } : {}}
-        transition={{ duration: 2, repeat: Infinity }}
-      >
-        {player.avatar}
-        {place === 1 && (
+      {/* Avatar + Crown */}
+      <div className="relative mb-4">
+        {isWinner && (
           <motion.div
-            className="absolute -top-3 -right-1"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
+            className="absolute -top-6 left-1/2 -translate-x-1/2 z-10"
+            initial={{ rotate: -20, scale: 0 }}
+            animate={{ rotate: 0, scale: 1.2 }}
             transition={{ delay: delay + 0.5, type: 'spring' }}
           >
-            <Crown className="w-6 h-6 text-primary fill-primary" />
+            <Crown className="w-10 h-10 text-yellow-500 fill-yellow-500 drop-shadow-md" />
           </motion.div>
         )}
-      </motion.div>
-
-      {/* Name */}
-      <p className="text-sm font-medium text-foreground mb-2 truncate max-w-20">
-        {player.name}
-      </p>
-
-      {/* Podium block */}
-      <motion.div
-        className={`w-20 rounded-t-lg bg-gradient-to-b ${colors[place as 1 | 2 | 3]} flex flex-col items-center justify-start pt-3`}
-        initial={{ height: 0 }}
-        animate={{ height }}
-        transition={{ delay: delay + 0.2, duration: 0.6, ease: 'easeOut' }}
-      >
-        <span className="text-2xl font-bold text-white">{place}</span>
-        <span className="text-lg font-bold text-white/90 mt-1">
-          {player.score}
-        </span>
-      </motion.div>
-    </motion.div>
-  )
-}
-
-interface StatsCardProps {
-  player: Player
-  rank: number
-}
-
-function StatsCard({ player, rank }: StatsCardProps) {
-  const accuracy = player.totalAnswers > 0
-    ? Math.round((player.correctAnswers / player.totalAnswers) * 100)
-    : 0
-
-  return (
-    <motion.div
-      className="glass rounded-xl p-4"
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: rank * 0.1 }}
-    >
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-3 flex-1">
-          <span className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-lg">
-            {player.avatar}
-          </span>
-          <div>
-            <p className="font-medium text-foreground">{player.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {getPlayerTitle(player.score)}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Target className="w-4 h-4" />
-            <span>{accuracy}%</span>
-          </div>
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Flame className="w-4 h-4" />
-            <span>{player.streak}</span>
-          </div>
-          <div className="font-bold gradient-text">
-            {player.score} pts
-          </div>
+        <div className={`w-16 h-16 rounded-3xl bg-white border-4 flex items-center justify-center text-4xl shadow-sticker ${isWinner ? 'border-yellow-400' : 'border-primary/10'}`}>
+          {player.avatar}
         </div>
       </div>
+
+      {/* Name */}
+      <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2 truncate w-full text-center">{player.name}</p>
+
+      {/* The Column */}
+      <motion.div
+        className={`w-full rounded-t-[2rem] border-x-4 border-t-4 relative ${colors[rank as 1|2|3]} shadow-sticker`}
+        style={{ height }}
+        initial={{ height: 0 }}
+        animate={{ height }}
+        transition={{ delay: delay + 0.3, duration: 1, ease: 'circOut' }}
+      >
+        <div className="absolute inset-0 flex flex-col items-center justify-start pt-4 gap-1">
+          <span className="text-3xl filter grayscale-[0.5]">{medals[rank as 1|2|3]}</span>
+          <span className="text-white font-black text-lg drop-shadow-sm">{player.score}</span>
+        </div>
+      </motion.div>
     </motion.div>
   )
 }

@@ -10,6 +10,7 @@ import { ResultsScreen } from '@/components/screens/results-screen'
 import { ImportModal } from '@/components/import-modal'
 import { SettingsModal } from '@/components/settings-modal'
 import { SplashScreen } from '@/components/ui/splash-screen'
+import { StatsModal } from '@/components/stats-modal'
 
 // Dynamic import for GameScreen to avoid SSR issues with Three.js
 const GameScreen = dynamic(
@@ -21,6 +22,7 @@ export default function Home() {
   const { gamePhase } = useGameStore()
   const [showImportModal, setShowImportModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [showStatsModal, setShowStatsModal] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
 
@@ -49,8 +51,8 @@ export default function Home() {
             {gamePhase === 'home' && (
               <HomeScreen 
                 key="home" 
-                onImportClick={() => setShowImportModal(true)} 
                 onSettingsClick={() => setShowSettingsModal(true)}
+                onStatsClick={() => setShowStatsModal(true)}
               />
             )}
 
@@ -75,6 +77,11 @@ export default function Home() {
       <ImportModal 
         isOpen={showImportModal} 
         onClose={() => setShowImportModal(false)} 
+      />
+
+      <StatsModal
+        isOpen={showStatsModal}
+        onClose={() => setShowStatsModal(false)}
       />
 
       <SettingsModal

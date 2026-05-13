@@ -9,45 +9,48 @@ interface QuestionCardProps {
 }
 
 const difficultyLabels = {
-  easy: 'Facile',
-  medium: 'Moyen',
-  hard: 'Difficile',
+  facile: 'Facile',
+  moyen: 'Moyen',
+  difficile: 'Difficile',
 }
 
 const difficultyColors = {
-  easy: 'text-success bg-success/20',
-  medium: 'text-warning bg-warning/20',
-  hard: 'text-destructive bg-destructive/20',
+  facile: 'text-success bg-success/20',
+  moyen: 'text-warning bg-warning/20',
+  difficile: 'text-destructive bg-destructive/20',
 }
 
 const typeLabels = {
   qcm: 'QCM',
-  truefalse: 'Vrai/Faux',
-  rapid: 'Rapide',
+  'vrai-faux': 'Vrai/Faux',
+  rapide: 'Rapide',
 }
 
 export function QuestionCard({ question, diceResult }: QuestionCardProps) {
   return (
     <motion.div
-      className="w-full p-6 rounded-2xl glass"
+      className="w-full p-8 rounded-3xl bg-white border-[6px] border-primary/10 shadow-sticker relative overflow-hidden"
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
     >
+      <div className="absolute top-0 left-0 w-full h-2 bg-primary/20" />
+      
       {/* Badges */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        <span className={`px-3 py-1 rounded-full text-xs font-medium ${difficultyColors[question.difficulty]}`}>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider ${difficultyColors[question.difficulty]}`}>
           {difficultyLabels[question.difficulty]}
         </span>
-        <span className="px-3 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+        <span className="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-secondary text-secondary-foreground">
           {typeLabels[question.type]}
         </span>
-        <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary">
+        <span className="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary">
           {question.category}
         </span>
+        
         {diceResult.bonusMultiplier > 1 && (
           <motion.span
-            className="px-3 py-1 rounded-full text-xs font-bold bg-primary text-primary-foreground glow-pulse"
+            className="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-primary text-white shadow-lg"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 500, damping: 15 }}
@@ -57,14 +60,14 @@ export function QuestionCard({ question, diceResult }: QuestionCardProps) {
         )}
       </div>
 
-      {/* Question text */}
+      {/* Question label */}
       <motion.h2
-        className="text-xl font-semibold text-foreground leading-relaxed"
+        className="text-2xl md:text-3xl font-black text-primary leading-tight"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        {question.text}
+        {question.label}
       </motion.h2>
     </motion.div>
   )

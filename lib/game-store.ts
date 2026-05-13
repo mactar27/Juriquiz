@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { 
   GameState, 
   Player, 
@@ -16,7 +17,9 @@ interface GameStore extends GameState {
   addPlayer: (player: Player) => void
   removePlayer: (playerId: string) => void
   startGame: () => void
+  rematch: () => void
   rollDice: () => Promise<DiceResult>
+  completeRoll: (result: DiceResult) => void
   answerQuestion: (answerIndex: number, timeRemaining: number) => void
   nextTurn: () => void
   resetGame: () => void
@@ -41,58 +44,71 @@ const initialState: GameState = {
   soundEnabled: true,
 }
 
-export const useGameStore = create<GameStore>((set, get) => ({
-  ...initialState,
+export const useGameStore = create<GameStore>()(
+  persist(
+    (set, get) => ({
+      ...initialState,
 
-  setPlayers: (players) => set({ players }),
+      setPlayers: (players) => set({ players }),
 
-  addPlayer: (player) => set((state) => ({ 
-    players: [...state.players, player] 
-  })),
+      addPlayer: (player) => set((state) => ({ 
+        players: [...state.players, player] 
+      })),
 
-  removePlayer: (playerId) => set((state) => ({
-    players: state.players.filter(p => p.id !== playerId)
-  })),
+      removePlayer: (playerId) => set((state) => ({
+        players: state.players.filter(p => p.id !== playerId)
+      })),
 
-  startGame: () => {
-    const { players, questions } = get()
-    if (players.length < 1) return
-    
-    // Reset player scores
-    const resetPlayers = players.map(p => ({
-      ...p,
-      score: 0,
-      streak: 0,
-      correctAnswers: 0,
-      totalAnswers: 0,
-    }))
-    
-    set({
-      players: resetPlayers,
-      currentPlayerIndex: 0,
-      usedQuestionIds: [],
-      currentQuestion: null,
-      diceResult: null,
-      gamePhase: 'rolling',
-      roundNumber: 1,
-      lastAnswerCorrect: null,
-    })
-  },
-
-  rollDice: async () => {
-    return new Promise((resolve) => {
-      // In this mode, the next player is always sequential
-      const { players, currentPlayerIndex, questions, usedQuestionIds } = get()
-      const nextPlayerIndex = (currentPlayerIndex + 1) % players.length
-      
-      // Simulate dice rolling animation time
-      setTimeout(() => {
-        // The face result must match the next player index for the dice to land on their name
-        // face 1 = index 0, face 2 = index 1, etc.
-        const targetFace = (nextPlayerIndex % 6) + 1
-        const result = DICE_FACES[targetFace]
+      startGame: () => {
+        const { players } = get()
+        if (players.length < 1) return
         
-        // Get a question matching the result difficulty
+        const resetPlayers = players.map(p => ({
+          ...p,
+          score: 0,
+          streak: 0,
+          correctAnswers: 0,
+          totalAnswers: 0,
+        }))
+        
+        set({
+          ...initialState,
+          players: resetPlayers,
+          gamePhase: 'rolling',
+        })
+      },
+
+      rematch: () => {
+        const { players } = get()
+        const resetPlayers = players.map(p => ({
+          ...p,
+          score: 0,
+          streak: 0,
+          correctAnswers: 0,
+          totalAnswers: 0,
+        }))
+        
+        set({
+          ...initialState,
+          players: resetPlayers,
+          gamePhase: 'rolling',
+          roundNumber: 1,
+        })
+      },
+
+      rollDice: async () => {
+        const { players, currentPlayerIndex } = get()
+        // The wheel will land on the NEXT player
+        const nextPlayerIndex = (currentPlayerIndex + 1) % players.length
+        // For now, mapping players to 1-6 for the diceResult logic
+        const targetFace = (nextPlayerIndex % 6) + 1
+        return DICE_FACES[targetFace]
+      },
+
+      completeRoll: (result) => {
+        const { players, currentPlayerIndex, questions, usedQuestionIds } = get()
+        const nextPlayerIndex = (currentPlayerIndex + 1) % players.length
+        
         const question = getRandomQuestion(
           questions, 
           result.difficulty, 
@@ -101,85 +117,83 @@ export const useGameStore = create<GameStore>((set, get) => ({
         )
         
         set({ 
-          currentPlayerIndex: nextPlayerIndex, // Now the turn passes sequentially
+          currentPlayerIndex: nextPlayerIndex,
           diceResult: result,
           currentQuestion: question,
-          usedQuestionIds: question 
-            ? [...usedQuestionIds, question.id] 
-            : usedQuestionIds,
+          usedQuestionIds: question ? [...usedQuestionIds, question.id] : usedQuestionIds,
           gamePhase: 'question',
         })
+      },
+
+      answerQuestion: (answerIndex, timeRemaining) => {
+        const { currentQuestion, diceResult, players, currentPlayerIndex } = get()
+        if (!currentQuestion || !diceResult) return
+
+        const correct = answerIndex === currentQuestion.correctIndex
+        const points = calculateScore(correct, timeRemaining, diceResult.bonusMultiplier)
         
-        resolve(result)
-      }, 2000)
-    })
-  },
+        const updatedPlayers = [...players]
+        const currentPlayer = updatedPlayers[currentPlayerIndex]
+        
+        currentPlayer.score += points
+        currentPlayer.totalAnswers += 1
+        
+        if (correct) {
+          currentPlayer.correctAnswers += 1
+          currentPlayer.streak += 1
+          // Streak bonus
+          if (currentPlayer.streak > 1) {
+            currentPlayer.score += 5 * (currentPlayer.streak - 1)
+          }
+        } else {
+          currentPlayer.streak = 0
+        }
+        
+        set({
+          players: updatedPlayers,
+          lastAnswerCorrect: correct,
+          gamePhase: 'feedback',
+        })
+      },
 
-  answerQuestion: (answerIndex, timeRemaining) => {
-    const { currentQuestion, diceResult, players, currentPlayerIndex } = get()
-    if (!currentQuestion || !diceResult) return
+      nextTurn: () => {
+        const { roundNumber, totalRounds, players, currentPlayerIndex } = get()
+        
+        // If the current player was the last one, increment round
+        const isEndOfRound = currentPlayerIndex === players.length - 1
+        const nextRound = isEndOfRound ? roundNumber + 1 : roundNumber
 
-    const correct = answerIndex === currentQuestion.correctIndex
-    const multiplier = diceResult.bonusMultiplier
-    const points = calculateScore(correct, timeRemaining, multiplier)
-    
-    // Update current player
-    const updatedPlayers = [...players]
-    const currentPlayer = updatedPlayers[currentPlayerIndex]
-    
-    currentPlayer.score += points
-    currentPlayer.totalAnswers += 1
-    
-    if (correct) {
-      currentPlayer.correctAnswers += 1
-      currentPlayer.streak += 1
-      // Streak bonus: +5 for each consecutive correct answer after first
-      if (currentPlayer.streak > 1) {
-        currentPlayer.score += 5 * (currentPlayer.streak - 1)
-      }
-    } else {
-      currentPlayer.streak = 0
+        if (nextRound > totalRounds) {
+          set({ gamePhase: 'finished' })
+        } else {
+          set({ 
+            roundNumber: nextRound,
+            gamePhase: 'rolling',
+            diceResult: null,
+            currentQuestion: null,
+            lastAnswerCorrect: null,
+          })
+        }
+      },
+
+      resetGame: () => set(initialState),
+      setGamePhase: (phase) => set({ gamePhase: phase }),
+      toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
+      setQuestions: (questions) => set({ questions }),
+      addQuestions: (questions) => set((state) => ({
+        questions: [...state.questions, ...questions]
+      })),
+      setTotalRounds: (rounds) => set({ totalRounds: rounds }),
+    }),
+    {
+      name: 'juriquiz-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ 
+        players: state.players,
+        soundEnabled: state.soundEnabled,
+        totalRounds: state.totalRounds,
+        // We don't persist questions if they are built-in, but we can if we want
+      }),
     }
-    
-    set({
-      players: updatedPlayers,
-      lastAnswerCorrect: correct,
-      gamePhase: 'feedback',
-    })
-  },
-
-  nextTurn: () => {
-    const { players, currentPlayerIndex, roundNumber, totalRounds } = get()
-    
-    // Round increments when we get back to the first player
-    const isNewRound = currentPlayerIndex === players.length - 1
-    const newRoundNumber = isNewRound ? roundNumber + 1 : roundNumber
-    
-    // Check if game is finished
-    if (newRoundNumber > totalRounds && isNewRound) {
-      set({ gamePhase: 'finished' })
-      return
-    }
-    
-    set({
-      roundNumber: newRoundNumber,
-      currentQuestion: null,
-      diceResult: null,
-      lastAnswerCorrect: null,
-      gamePhase: 'rolling',
-    })
-  },
-
-  resetGame: () => set(initialState),
-
-  setGamePhase: (phase) => set({ gamePhase: phase }),
-
-  toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
-
-  setQuestions: (questions) => set({ questions }),
-
-  addQuestions: (questions) => set((state) => ({
-    questions: [...state.questions, ...questions]
-  })),
-  setTotalRounds: (rounds) => set({ totalRounds: rounds }),
-}))
+  )
+)

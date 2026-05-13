@@ -1,11 +1,9 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Volume2, VolumeX, Trophy, ShieldCheck, Info, RotateCcw } from 'lucide-react'
+import { Volume2, VolumeX, X, Trophy, Hash, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useGameStore } from '@/lib/game-store'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 
 interface SettingsModalProps {
@@ -14,131 +12,111 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-  const { 
-    soundEnabled, 
-    toggleSound, 
-    totalRounds, 
-    setTotalRounds,
-    resetGame 
-  } = useGameStore()
-
-  const handleReset = () => {
-    if (confirm('Voulez-vous vraiment réinitialiser toutes les données ?')) {
-      resetGame()
-      onClose()
-    }
-  }
+  const { soundEnabled, toggleSound, totalRounds, setTotalRounds } = useGameStore()
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <motion.div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/40 backdrop-blur-md"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
           <motion.div
-            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
-
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            className="w-full max-w-sm bg-white border-[6px] border-primary/10 rounded-[3rem] p-8 shadow-sticker relative overflow-hidden"
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
           >
-            <motion.div
-              className="w-full max-w-md bg-white border border-border rounded-3xl p-8 shadow-2xl relative overflow-hidden pointer-events-auto max-h-[90vh] overflow-y-auto"
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-            >
-              <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-primary to-accent" />
+            {/* Decoration */}
+            <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
+            
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-black text-primary tracking-tight">PARAMÈTRES</h2>
+              <Button
+                onClick={onClose}
+                variant="ghost"
+                size="icon"
+                className="rounded-full hover:bg-primary/5 text-primary"
+              >
+                <X className="w-6 h-6" />
+              </Button>
+            </div>
 
-              {/* Header */}
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                  Paramètres
-                </h2>
+            <div className="space-y-8">
+              {/* Sound Toggle */}
+              <div className="space-y-4">
+                <p className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
+                  <Volume2 className="w-3 h-3" />
+                  Environnement Sonore
+                </p>
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onClose}
-                  className="rounded-full"
+                  onClick={toggleSound}
+                  className={`w-full h-16 rounded-2xl flex items-center justify-between px-6 transition-all border-b-4 active:border-b-0 active:translate-y-1 ${
+                    soundEnabled
+                      ? 'bg-primary text-white border-primary/40'
+                      : 'bg-white text-muted-foreground border-border/40'
+                  }`}
                 >
-                  <X className="w-5 h-5" />
+                  <div className="flex items-center gap-3">
+                    {soundEnabled ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
+                    <span className="font-black text-lg">{soundEnabled ? 'ACTIF' : 'MUET'}</span>
+                  </div>
+                  <div className={`w-12 h-6 rounded-full relative transition-colors ${soundEnabled ? 'bg-white/30' : 'bg-muted'}`}>
+                    <motion.div
+                      className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm"
+                      animate={{ left: soundEnabled ? 28 : 4 }}
+                    />
+                  </div>
                 </Button>
               </div>
 
-              {/* Settings List */}
-              <div className="space-y-8">
-                {/* Audio */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl ${soundEnabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                      {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-                    </div>
-                    <div>
-                      <Label className="text-base font-bold">Effets Sonores</Label>
-                      <p className="text-xs text-muted-foreground">Activer ou désactiver les sons</p>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={soundEnabled}
-                    onCheckedChange={toggleSound}
-                  />
-                </div>
-
-                {/* Rounds */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-accent/10 text-accent">
-                      <Trophy className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <Label className="text-base font-bold">Nombre de tours: {totalRounds}</Label>
-                      <p className="text-xs text-muted-foreground">Durée de la partie par défaut</p>
-                    </div>
+              {/* Rounds count */}
+              <div className="space-y-4">
+                <p className="text-xs font-black text-primary/40 uppercase tracking-widest flex items-center gap-2">
+                  <Hash className="w-3 h-3" />
+                  Nombre de tours
+                </p>
+                <div className="p-6 bg-secondary/30 rounded-3xl border-2 border-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-4xl font-black text-primary">{totalRounds}</span>
+                    <Trophy className="w-8 h-8 text-warning" />
                   </div>
                   <Slider
                     value={[totalRounds]}
-                    onValueChange={(vals) => setTotalRounds(vals[0])}
-                    max={20}
                     min={5}
-                    step={1}
+                    max={30}
+                    step={5}
+                    onValueChange={(val) => setTotalRounds(val[0])}
                     className="cursor-pointer"
                   />
-                </div>
-
-                {/* Info */}
-                <div className="p-4 bg-secondary/30 rounded-2xl border border-border">
-                  <div className="flex gap-3 mb-2">
-                    <ShieldCheck className="w-5 h-5 text-success" />
-                    <span className="font-bold text-sm">Version 2.0 SN</span>
+                  <div className="flex justify-between mt-2 text-[10px] font-bold text-primary/40 uppercase">
+                    <span>Rapide</span>
+                    <span>Standard</span>
+                    <span>Marathon</span>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    JuriQuiz est conçu pour les étudiants en droit sénégalais. 
-                    Le contenu est basé sur l'Introduction Générale au Droit et la Constitution de 2016.
-                  </p>
                 </div>
-
-                {/* Reset */}
-                <Button
-                  variant="ghost"
-                  onClick={handleReset}
-                  className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 gap-2 font-bold"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Réinitialiser la progression
-                </Button>
               </div>
 
-              <div className="mt-8 pt-6 border-t border-border text-center">
-                <p className="text-xs text-muted-foreground">Fait avec ❤️ pour le Droit Sénégalais</p>
+              {/* Version Info */}
+              <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-2xl">
+                <ShieldCheck className="w-5 h-5 text-primary" />
+                <div>
+                  <p className="text-[10px] font-black text-primary uppercase">Version 2026 PWA</p>
+                  <p className="text-[10px] font-bold text-primary/60 uppercase">Contenu Juridique SN</p>
+                </div>
               </div>
-            </motion.div>
+            </div>
+
+            <Button
+              onClick={onClose}
+              className="w-full h-16 mt-10 text-lg font-black bg-primary text-white border-b-8 border-primary/40 rounded-2xl shadow-sticker active:border-b-0 active:translate-y-1"
+            >
+              VALIDER
+            </Button>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   )
