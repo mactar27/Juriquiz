@@ -48,10 +48,21 @@ export default function RootLayout({
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js').then(
                     function(registration) {
-                      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                      console.log('JuriQuiz SW registered');
+                      // Force update if a new version is available
+                      registration.onupdatefound = () => {
+                        const installingWorker = registration.installing;
+                        if (installingWorker) {
+                          installingWorker.onstatechange = () => {
+                            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                              window.location.reload();
+                            }
+                          };
+                        }
+                      };
                     },
                     function(err) {
-                      console.log('ServiceWorker registration failed: ', err);
+                      console.log('JuriQuiz SW failed: ', err);
                     }
                   );
                 });

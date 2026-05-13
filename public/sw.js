@@ -1,59 +1,67 @@
-const CACHE_NAME = 'juriquiz-sn-v2';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'juriquiz-sn-v4';
+
+const PRECACHE_ASSETS = [
   '/',
   '/manifest.webmanifest',
   '/icon.svg',
-  '/placeholder-logo.svg',
-  // On ne met pas les fichiers .js spécifiques ici car Next.js les hash, 
-  // le cache dynamique (fetch) s'en occupera automatiquement.
 ];
 
-// Installation : Mise en cache des assets de base
+// Installation : Mise en cache initiale
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(PRECACHE_ASSETS);
     })
   );
-  self.skipWaiting();
 });
 
-// Activation : Nettoyage des vieux caches
+// Activation : On prend le contrôle immédiatement
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      self.clients.claim(),
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+    ])
   );
 });
 
-// Stratégie : Stale-While-Revalidate
-// On affiche le cache immédiatement, mais on vérifie en arrière-plan s'il y a une mise à jour.
+// Stratégie : Network First with Cache Fallback
+// Pour un "Site", c'est la stratégie la plus fiable sur iOS.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.match(event.request).then((cachedResponse) => {
-        const fetchedResponse = fetch(event.request).then((networkResponse) => {
-          // On met à jour le cache avec la nouvelle version du réseau
-          if (networkResponse.status === 200 && event.request.url.startsWith(self.location.origin)) {
-            cache.put(event.request, networkResponse.clone());
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Si on a du réseau, on met à jour le cache
+        if (networkResponse.status === 200 && event.request.url.startsWith(self.location.origin)) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        // Si on est OFFLINE, on pioche dans le cache
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
           }
-          return networkResponse;
-        }).catch(() => {
-          // Si le réseau échoue (offline), on a déjà la réponse du cache
-          return cachedResponse;
+          // Fallback ultime : si on demande une page (navigation), on renvoie l'index
+          if (event.request.mode === 'navigate') {
+            return caches.match('/');
+          }
         });
-
-        return cachedResponse || fetchedResponse;
-      });
-    })
+      })
   );
 });
