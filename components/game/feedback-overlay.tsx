@@ -2,8 +2,9 @@
 
 import { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Check, X, Zap } from 'lucide-react'
+import { Check, X, Zap, Scale } from 'lucide-react'
 import confetti from 'canvas-confetti'
+import { Button } from '@/components/ui/button'
 
 interface FeedbackOverlayProps {
   correct: boolean
@@ -30,10 +31,7 @@ export function FeedbackOverlay({
         colors: ['#d4af37', '#22c55e', '#f5f5f0'],
       })
     }
-
-    const timer = setTimeout(onComplete, 2000)
-    return () => clearTimeout(timer)
-  }, [correct, streak, onComplete])
+  }, [correct, streak])
 
   return (
     <motion.div
@@ -105,17 +103,52 @@ export function FeedbackOverlay({
           </motion.div>
         )}
 
-        {/* Explanation */}
-        {explanation && (
-          <motion.p
-            className="mt-6 text-muted-foreground max-w-md"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5 }}
+        {/* Explanation and Correct Answer */}
+        <motion.div
+          className="mt-6 space-y-4 max-w-md"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          {!correct && (
+            <div className="p-4 rounded-2xl bg-success/10 border-2 border-success/20">
+              <p className="text-xs font-black text-success uppercase tracking-widest mb-1">La bonne réponse était :</p>
+              <p className="text-lg font-bold text-foreground italic">
+                {explanation?.split('|')[0] || "Voir ci-dessous"}
+              </p>
+            </div>
+          )}
+          
+          {explanation && (
+            <div className="p-6 rounded-3xl bg-secondary/30 border-4 border-white/50 text-left relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-2 opacity-10">
+                <Scale className="w-12 h-12" />
+              </div>
+              <p className="text-xs font-black text-primary/40 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                Le saviez-vous ?
+              </p>
+              <p className="text-sm text-foreground leading-relaxed font-medium">
+                {explanation.includes('|') ? explanation.split('|')[1] : explanation}
+              </p>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Continue Button */}
+        <motion.div
+          className="mt-8 w-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+        >
+          <Button
+            onClick={onComplete}
+            className="w-full h-14 text-lg font-black bg-primary text-white border-b-4 border-primary/40 rounded-2xl shadow-sticker hover:bg-primary/90"
           >
-            {explanation}
-          </motion.p>
-        )}
+            CONTINUER
+          </Button>
+        </motion.div>
       </motion.div>
     </motion.div>
   )
